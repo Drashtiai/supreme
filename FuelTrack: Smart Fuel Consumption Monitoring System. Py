@@ -1,1 +1,197 @@
+from statistics import LinearRegression
 
+import streamlit as st
+from sklearn.preprocessing import LabelEncoder
+from streamlit_option_menu import option_menu
+import pandas as pd
+from  matplotlib import pyplot as plt
+
+from sklearn.linear_model import LinearRegression
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from sklearn.metrics  import accuracy_score
+from sklearn.ensemble import RandomForestRegressor
+
+
+
+with st.sidebar:
+   selected = option_menu("Admin Panel",["Dashboard","About us","Dataset","Project",
+                                         "Login","Settings"],
+                          icons=["cast","people","table","activity","lock","gear"],
+                          menu_icon="cast",
+                          default_index=0,
+                          orientation="vertical")
+
+
+
+
+if selected == "Dashboard":
+    st.markdown("<h1 style='color:#00BFFF; font-size: 42px;'>🚗 FuelTrack</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #CCCCCC;'>Smart Fuel Consumption Monitoring System</h3>", unsafe_allow_html=True)
+    st.write(
+        "FuelTrack is a machine learning-based system designed to predict the amount of fuel needed for any journey. "
+        "It considers inputs such as vehicle type, road condition, distance to travel, and average mileage to give accurate fuel estimates."
+    )
+
+    st.markdown("### 🚙 Why Use FuelTrack?")
+    st.write("- Helps avoid fuel wastage")
+    st.write("- Saves cost and improves trip planning")
+    st.write("- Suitable for individuals, travelers, and transport companies")
+
+    st.markdown("### 📊  Machine Learning")
+    st.write("The system uses trained ML models (Random Forest & Linear Regression) to make smart predictions.")
+
+    st.write("✨ Plan smarter, drive better, and save fuel with FuelTrack!")
+
+
+
+
+elif selected == "About us":
+    st.title("📘 About Us")
+    st.subheader("Project Info")
+
+    st.write("FuelTrack is a smart fuel consumption monitoring system developed using machine learning.")
+    st.write("It helps users estimate how much fuel will be needed for a journey by taking inputs like:")
+    st.markdown("""
+    - 🚗 Vehicle type  
+    - 🛣️ Total distance  
+    - ⛽ Average mileage  
+    - 🏞️ Road type (such as plain or hilly)
+    """)
+
+    st.subheader("🎯 Objective")
+    st.write("The main aim of this project is to:")
+    st.markdown("""
+    - Reduce fuel wastage  
+    - Save travel costs  
+    - Help users plan trips more efficiently  
+    - Support smart fuel management for both individuals and logistics services
+    """)
+
+    st.subheader("⚙️ Technology Used")
+    st.write("This system is built using supervised machine learning techniques like:")
+    st.markdown("""
+    - Linear Regression  
+    - Random Forest Regressor  
+    """)
+
+    st.write("The model is trained on various types of vehicle data, mileage records, travel distances, and road conditions.")
+
+    st.subheader("🚗 The Road Forward")
+    st.write(
+        " it's a step toward smarter, data-driven transportation solutions "
+        "that help reduce costs, save fuel, and promote sustainable travel."
+    )
+    st.write(
+        "FuelTrack represents a shift toward smarter, data-driven decision-making in the transportation sector. "
+        "By applying machine learning techniques to predict fuel usage, we’re not only helping individuals plan better journeys, "
+        "but also contributing to a more energy-efficient and environmentally responsible future."
+    )
+
+    st.write(
+        "As we move forward, we aim to integrate even more advanced features — such as real-time traffic data, route optimization, "
+        "and fuel price analytics — to make this tool even more powerful and practical for real-world use."
+    )
+
+    st.write(
+        "Whether you're a daily commuter, a travel enthusiast, or a logistics manager, FuelTrack is designed to give you insights "
+        "that matter — helping reduce fuel costs, lower carbon emissions, and ensure every drop of fuel is well spent."
+    )
+
+    st.markdown("### 🌿 Let’s drive toward a smarter, greener future — one prediction at a time.")
+
+
+
+elif selected ==  "Dataset":
+   st.header("Project Dataset")
+   df = pd.read_csv("project.csv")
+   st.dataframe(df)
+
+
+
+
+elif selected == "Login":
+   st.header("Login")
+   st.write("Enter your email and password")
+   with st.form(key = "form1"):
+       email = st.text_input("Enter your email")
+       password = st.text_input("Enter your password",type="password")
+       button = st.form_submit_button(label="Submit")
+
+
+       if button:
+           if email == "abc@gmail.com" and password == "1234":
+               st.success("Login Successfully")
+           elif email == "" and password == "":
+               st.error("password and username should not be blank")
+           elif email ==  "" and password != "":
+               st.error("Email should not be blank")
+           elif email != "" and password == "":
+               st.error("Password should not be blank")
+           elif email !=  "abc@gmail.com" and password == "1234":
+               st.error("Email is Invalid")
+           elif email == "abc@gmail.com" and password != "1234":
+               st.error("Password is Invalid")
+           else:
+               st.error("Invalid email or password")
+
+
+elif selected =="Settings":
+   st.header("Settings")
+   st.info("Setting page is under development")
+
+
+
+elif selected == "Project":
+    df = pd.read_csv("project.csv")
+    st.header("Fuel Consumption")
+    st.info("To predict the fuel consumption")
+
+    # Label encoding
+    le_vehical = LabelEncoder()
+    le_road = LabelEncoder()
+
+    df["vehicle_type"] = le_vehical.fit_transform(df["vehicle_type"])
+    df["road_type"] = le_road.fit_transform(df["road_type"])
+
+    x = df[['vehicle_type', 'distance_km', 'average_mileage_kmpl', 'road_type']]
+    y = df['expected_fuel_needed_litres']
+
+
+
+
+
+# 1. Split data
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+
+    # 2. Train model
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(x_train, y_train)
+
+    # 3. Predict on test set
+    y_pred = model.predict(x_test)
+
+    # 4. Calculate R² accuracy
+    accuracy = r2_score(y_test, y_pred)
+    st.success(f"✅ Model Accuracy (R² Score): {accuracy:.2f}")
+
+    st.title("Fuel Consumption Predictor")
+
+    vehi_input = st.selectbox("Select your vehicle type:", le_vehical.classes_)
+    road_type = st.selectbox("Select road type:", le_road.classes_)
+    distance_input = st.number_input("Enter your distance in km:", min_value=0)
+    mileage = st.number_input("Enter your mileage (km per litre):", min_value=0.1)
+
+    if st.button("Predict fuel needed"):
+        veh_encoded = le_vehical.transform([vehi_input])[0]
+        road_encoded = le_road.transform([road_type])[0]
+        input_features = [[veh_encoded, distance_input, mileage, road_encoded]]
+        raw_prediction = model.predict(input_features)[0]
+
+        rule_based = distance_input / mileage
+
+        st.info(f"📏 Rule-based Estimate: *{rule_based:.2f} litres*")
+        st.success(f"🤖 Model-based Estimate: *{raw_prediction:.2f} litres*")
